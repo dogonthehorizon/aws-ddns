@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Resources for DDNS-like solution w/ AWS
+Parameters:
+  SubDomain:
+    Type: String
+    Description: The subdomain name to attach to the given hosted zone.
+  HostedZone:
+    Type: String
+    Description: The hosted zone to create a DNS alias in.
+  InitialPublicIp:
+    Type: String
+    Description: The initial IP address to associate with the alias.
+Resources:
+  RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Sub "${SubDomain}.${HostedZone}"
+      HostedZoneName: !Sub "${HostedZone}."
+      Type: A
+      TTL: 3600  # 5 minutes
+      ResourceRecords:
+        - !Ref InitialPublicIp
+  IpBucket:
+    Type: AWS::S3::Bucket
+  Route53Handler:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: not_used
+      Runtime: provided
+      CodeUri: .stack-work/docker/_home/.local/bin
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          DNS_RECORD: !Ref RecordSet
+      Events:
+        PostIpUpdate:
+          Type: S3
+          Properties:
+            Bucket: !Ref IpBucket
+            Events:
+              - s3:ObjectCreated:Put
+              - s3:ObjectCreated:Post
+  # You'll need to manually pull down the credentials for this user after
+  # it's been created by CloudFormation.
+  BucketWriteUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Sub "${IpBucket}-Writer"
+      Policies:
+        - PolicyName: S3Write
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
+                  - !Sub "arn:aws:s3:::${IpBucket}/*"
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${IpBucket}"

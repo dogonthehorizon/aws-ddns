@@ -1,0 +1,67 @@
+name:                aws-ddns
+version:             0.1.0
+homepage:            dogonthehorizon/aws-ddns
+license:             BSD3
+author:              Fernando Freire
+maintainer:          dogonthehorizon@gmail.com
+copyright:           2019 Fernando Freire
+category:            Web
+extra-source-files:
+- README.md
+
+ghc-options:
+  - -Wall
+  - -fno-warn-name-shadowing
+  - -fno-warn-partial-type-signatures
+  - -fwarn-incomplete-patterns
+  - -fwarn-missing-signatures
+  - -fwarn-tabs
+  - -fwarn-unused-imports
+  - -fprint-potential-instances
+
+# Needs to manually be kept in sync w/ .stylish-haskell.yaml
+default-extensions:
+  - BangPatterns
+  - DefaultSignatures
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveLift
+  - DeriveTraversable
+  - EmptyCase
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - LambdaCase
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - OverloadedStrings
+  - PatternSynonyms
+  - ScopedTypeVariables
+  - TemplateHaskell
+
+
+dependencies:
+  - base >= 4.7 && < 5
+  - amazonka
+  - aeson
+  - exceptions
+  - text
+
+library:
+  source-dirs: src
+  dependencies:
+    - amazonka-core
+    - amazonka-s3
+    - amazonka-route53
+
+executables:
+  bootstrap:
+    source-dirs:      app
+    main:             Main.hs
+    dependencies:
+      - aws-ddns
+      - envy
+      - hal
+      - mtl
+      - katip
