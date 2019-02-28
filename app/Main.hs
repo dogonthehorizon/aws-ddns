@@ -1,29 +1,28 @@
 module Main where
 
-import           AWS.Lambda.Context            (HasLambdaContext (withContext))
-import           AWS.Lambda.Events.S3.PutEvent (PutRecords, Records (..),
-                                                records)
-import           AWS.Lambda.Runtime            (mRuntimeWithContext)
-import           Control.Monad.Catch           (MonadCatch, MonadThrow, bracket)
-import           Control.Monad.IO.Class        (MonadIO)
-import           Control.Monad.Reader          (MonadReader, ReaderT, asks,
-                                                local, runReaderT)
-import           Control.Monad.Trans.AWS       (runAWST)
-import           Data.Aeson                    (Value (..))
-import           Data.Text                     (Text)
-import           Katip                         (ColorStrategy (ColorIfTerminal),
-                                                Katip, KatipContext,
-                                                LogContexts, LogEnv,
-                                                Namespace (..),
-                                                Severity (InfoS),
-                                                Verbosity (V2))
-import qualified Katip                         as K
-import           Network.AWS                   (AWS, Credentials (Discover),
-                                                MonadAWS, liftAWS, newEnv,
-                                                runResourceT)
-import           System.Envy                   (FromEnv (fromEnv), decodeEnv,
-                                                env)
-import           System.IO                     (stdout)
+import           AWS.Lambda.Context      (HasLambdaContext (withContext))
+import           AWS.Lambda.Events.S3    (Records (..), bucket, key, name,
+                                          object, s3)
+import           AWS.Lambda.Runtime      (mRuntimeWithContext)
+import           AwsDynDns.AWS           (getIp)
+import           Control.Monad.Catch     (MonadCatch, MonadThrow, bracket)
+import           Control.Monad.IO.Class  (MonadIO)
+import           Control.Monad.Reader    (MonadReader, ReaderT, asks, local,
+                                          runReaderT)
+import           Control.Monad.Trans.AWS (envLogger, runAWST)
+import           Data.Aeson              (Value (..))
+import           Data.Text               (Text)
+import           Katip                   (ColorStrategy (ColorIfTerminal),
+                                          Katip, KatipContext, LogContexts,
+                                          LogEnv, Namespace (..),
+                                          Severity (InfoS), Verbosity (V2))
+import qualified Katip                   as K
+import           Lens.Micro              ((&), (.~))
+import           Network.AWS             (AWS, Credentials (Discover),
+                                          MonadAWS, newEnv,
+                                          runResourceT)
+import           System.Envy             (FromEnv (fromEnv), decodeEnv, env)
+import           System.IO               (stdout)
 
 
 data Environment = Environment {
@@ -58,10 +57,17 @@ instance KatipContext AwsDynDns where
   getKatipNamespace = asks logNamespace
   localKatipNamespace f = local (\s -> s { logNamespace = f (logNamespace s)})
 
-handler :: PutRecords -> AwsDynDns Value
+handler :: Records -> AwsDynDns Value
 handler Records { records = [] } =
     fail "Got no events, something is very wrong."
-handler Records { records = [record] } = undefined -- TODO use lenses to get bucket && key
+handler Records { records = [record] } = do
+    let targetBucket = (name . bucket . s3) record
+    let targetKey    = (key . object . s3) record
+
+    ipAddress <- getIp targetBucket targetKey
+
+    $(K.logTM) InfoS $ K.logStr $ show ipAddress
+    return Null
 handler Records { records } =
     fail
         $  "Got "

@@ -11,6 +11,11 @@ Parameters:
   InitialPublicIp:
     Type: String
     Description: The initial IP address to associate with the alias.
+  BucketName:
+    Type: String
+    Description: >
+      Name of the bucket used to store IP addresses. SAM isn't smart enough to
+      generate name for us _and_ stand up resources without a cycle.
 Resources:
   RecordSet:
     Type: AWS::Route53::RecordSet
@@ -23,6 +28,8 @@ Resources:
         - !Ref InitialPublicIp
   IpBucket:
     Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
   Route53Handler:
     Type: AWS::Serverless::Function
     Properties:
@@ -34,6 +41,11 @@ Resources:
       Environment:
         Variables:
           DNS_RECORD: !Ref RecordSet
+      Policies:
+        # We create a cycle if we !Ref IpBucket, so use the provided
+        # BucketName instead.
+        - S3ReadPolicy:
+            BucketName: !Ref BucketName
       Events:
         PostIpUpdate:
           Type: S3
@@ -47,7 +59,7 @@ Resources:
   BucketWriteUser:
     Type: AWS::IAM::User
     Properties:
-      UserName: !Sub "${IpBucket}-Writer"
+      UserName: !Sub "${BucketName}-Writer"
       Policies:
         - PolicyName: S3Write
           PolicyDocument:
@@ -57,9 +69,9 @@ Resources:
                 Action:
                   - s3:PutObject
                 Resource:
-                  - !Sub "arn:aws:s3:::${IpBucket}/*"
+                  - !Sub "arn:aws:s3:::${BucketName}/*"
               - Effect: Allow
                 Action:
                   - s3:ListBucket
                 Resource:
-                  - !Sub "arn:aws:s3:::${IpBucket}"
+                  - !Sub "arn:aws:s3:::${BucketName}"

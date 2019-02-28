@@ -47,6 +47,7 @@ dependencies:
   - aeson
   - exceptions
   - text
+  - microlens
 
 library:
   source-dirs: src
@@ -54,6 +55,7 @@ library:
     - amazonka-core
     - amazonka-s3
     - amazonka-route53
+    - conduit-extra
 
 executables:
   bootstrap:
