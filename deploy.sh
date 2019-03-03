@@ -17,5 +17,6 @@ aws cloudformation deploy \
   --parameter-overrides \
     SubDomain="$SUB_DOMAIN" \
     HostedZone="$HOSTED_ZONE" \
+    HostedZoneId="$HOSTED_ZONE_ID" \
     InitialPublicIp="$INITIAL_PUBLIC_IP" \
     BucketName="$BUCKET_NAME"

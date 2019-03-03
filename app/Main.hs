@@ -4,7 +4,7 @@ import           AWS.Lambda.Context      (HasLambdaContext (withContext))
 import           AWS.Lambda.Events.S3    (Records (..), bucket, key, name,
                                           object, s3)
 import           AWS.Lambda.Runtime      (mRuntimeWithContext)
-import           AwsDynDns.AWS           (getIp)
+import           AwsDynDns.AWS           (getIp, updateResourceRecordSet)
 import           Control.Monad.Catch     (MonadCatch, MonadThrow, bracket)
 import           Control.Monad.IO.Class  (MonadIO)
 import           Control.Monad.Reader    (MonadReader, ReaderT, asks, local,
@@ -18,15 +18,14 @@ import           Katip                   (ColorStrategy (ColorIfTerminal),
                                           Severity (InfoS), Verbosity (V2))
 import qualified Katip                   as K
 import           Lens.Micro              ((&), (.~))
-import           Network.AWS             (AWS, Credentials (Discover),
-                                          MonadAWS, newEnv,
-                                          runResourceT)
+import           Network.AWS             (AWS, Credentials (Discover), MonadAWS,
+                                          newEnv, runResourceT)
 import           System.Envy             (FromEnv (fromEnv), decodeEnv, env)
 import           System.IO               (stdout)
 
 
 data Environment = Environment {
-  dnsRecord :: Text
+  hostedZoneId :: Text
 }
 
 data Context = Context {
@@ -37,7 +36,7 @@ data Context = Context {
 }
 
 instance FromEnv Environment where
-  fromEnv = Environment <$> env "DNS_RECORD"
+  fromEnv = Environment <$> env "HOSTED_ZONE_ID"
 
 instance HasLambdaContext Context where
   withContext _ e = e
@@ -61,12 +60,26 @@ handler :: Records -> AwsDynDns Value
 handler Records { records = [] } =
     fail "Got no events, something is very wrong."
 handler Records { records = [record] } = do
+
+    Environment { hostedZoneId } <- asks environment
+
     let targetBucket = (name . bucket . s3) record
     let targetKey    = (key . object . s3) record
 
     ipAddress <- getIp targetBucket targetKey
 
-    $(K.logTM) InfoS $ K.logStr $ show ipAddress
+    $(K.logTM) InfoS
+        $  K.logStr
+        $  "Found '"
+        <> ipAddress
+        <> "' in '"
+        <> targetKey
+        <> "'."
+
+    val <- updateResourceRecordSet hostedZoneId targetKey ipAddress
+
+    $(K.logTM) InfoS $ K.logStr $ show val
+
     return Null
 handler Records { records } =
     fail
