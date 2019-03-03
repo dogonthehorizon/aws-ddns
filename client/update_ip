@@ -3,3 +3,5 @@
 curl -s https://ipinfo.io/ip > "$FILE"
 
 aws s3 cp "$FILE" "s3://$BUCKET/$FILE"
+
+rm "$FILE"
