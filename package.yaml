@@ -40,30 +40,22 @@ default-extensions:
   - ScopedTypeVariables
   - TemplateHaskell
 
-
-dependencies:
-  - base >= 4.7 && < 5
-  - amazonka
-  - aeson
-  - exceptions
-  - text
-  - microlens
-
-library:
-  source-dirs: src
-  dependencies:
-    - amazonka-core
-    - amazonka-s3
-    - amazonka-route53
-    - conduit-extra
-
 executables:
   bootstrap:
-    source-dirs:      app
+    source-dirs:      src
     main:             Main.hs
     dependencies:
-      - aws-ddns
+      - base >= 4.7 && < 5
+      - aeson
+      - amazonka
+      - amazonka-core
+      - amazonka-route53
+      - amazonka-s3
+      - conduit-extra
       - envy
+      - exceptions
       - hal
-      - mtl
       - katip
+      - microlens
+      - mtl
+      - text

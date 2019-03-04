@@ -1,4 +1,4 @@
-module AwsDynDns.AWS where
+module AwsDdns.AWS where
 
 import           Data.Conduit.Binary                          (sinkLbs)
 import           Data.Text                                    (Text)

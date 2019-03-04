@@ -14,15 +14,15 @@ setup: clean
 
 _HLINT=hlint {} \;
 hlint:
-	@find {src,app}/ -name "*.hs" -exec $(_HLINT)
+	@find src/ -name "*.hs" -exec $(_HLINT)
 
 _STYLISH=stylish-haskell -i {} \;
 stylish-haskell:
-	@find {src,app}/ -name "*.hs" -exec $(_STYLISH)
+	@find src/ -name "*.hs" -exec $(_STYLISH)
 
 _BRITTANY=brittany --write-mode=inplace {} \;
 brittany:
-	@find {src,app}/ -name "*.hs" -exec $(_BRITTANY)
+	@find src/ -name "*.hs" -exec $(_BRITTANY)
 
 lint-all: stylish-haskell hlint brittany
 
