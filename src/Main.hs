@@ -1,3 +1,5 @@
+{-# LANGUAGE QuasiQuotes #-}
+
 module Main where
 
 import           AWS.Lambda.Events.S3 (Records (..), bucket, key, name, object,
@@ -7,8 +9,10 @@ import           AwsDdns.Monad        (AwsDdns (..), Context (..),
                                        Environment (..), runLambda)
 import           Control.Monad.Reader (asks)
 import           Data.Aeson           (Value (..))
+import           Data.Text            (Text)
 import           Katip                (Severity (InfoS))
 import qualified Katip                as K
+import           PyF                  (f)
 
 handler :: Records -> AwsDdns Value
 handler Records { records = [] } =
@@ -23,12 +27,7 @@ handler Records { records = [record] } = do
     ipAddress <- getIp targetBucket targetKey
 
     $(K.logTM) InfoS
-        $  K.logStr
-        $  "Found '"
-        <> ipAddress
-        <> "' in '"
-        <> targetKey
-        <> "'."
+        $ K.logStr ([f|Found '{ipAddress}' in '{targetKey}'.|] :: Text)
 
     val <- updateResourceRecordSet hostedZoneId targetKey ipAddress
 

@@ -40,6 +40,7 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
   - basic-lens-0.0.2@sha256:11fc2a10bd2c956fc0700660a6a86b0eacbb3487b5d8cf603f97dcb7b0707d5c
+  - PyF-0.7.1.0@sha256:521046a5408e475320aa6dfa05e10adddc5645fd4b391a71ac842f1448b3f7bd
   # https://github.com/brendanhay/amazonka/issues/466
   - git: https://github.com/brendanhay/amazonka.git
     commit: d6120081222808ca6173b28b07d13b1721a7fc07
