@@ -28,13 +28,20 @@ import           Network.AWS.S3.Types                         (BucketName (..),
 consNEmpty :: a -> NonEmpty a
 consNEmpty = flip (:|) []
 
+-- | Read the IP address out of bucketKey in bucketName.
 -- TODO eventually it'll make sense to validate the IP
-getIp :: (MonadAWS m) => Text -> Text -> m Text
+getIp
+    :: (MonadAWS m)
+    => Text -- ^ The target bucket.
+    -> Text -- ^ The target key to read from bucket.
+    -> m Text
 getIp bucketName bucketKey = do
     val <- send $ getObject (BucketName bucketName) (ObjectKey bucketKey)
     toStrict . strip . TE.decodeUtf8 <$> sinkBody (view gorsBody val) sinkLbs
 
 -- | Update the given A record in the given hosted zone with the given IP.
+-- TODO make TTL configurable
+-- TODO return something more semantically relevant than the raw AWS response
 updateResourceRecordSet
     :: (MonadAWS m)
     => Text -- ^ The hosted zone id to change record sets in.
@@ -48,5 +55,4 @@ updateResourceRecordSet hostedZoneId recordSetDomain ipAddress =
     aRecord =
         resourceRecordSet recordSetDomain A
             & (rrsResourceRecords ?~ (consNEmpty . resourceRecord $ ipAddress))
-            . (rrsTTL ?~ 3600) -- TODO make configurable
-
+            . (rrsTTL ?~ 3600)

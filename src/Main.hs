@@ -14,6 +14,8 @@ import           Katip                (Severity (InfoS))
 import qualified Katip                as K
 import           PyF                  (f)
 
+-- | Update A records based on the ip address found in each file triggered by
+--   an S3 event.
 handler :: Records -> AwsDdns Value
 handler Records { records = [] } =
     fail "Got no events, something is very wrong."
