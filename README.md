@@ -23,7 +23,7 @@ support a restricted number of hosts. Most paid solutions range anywhere from
 $2 to $20 USD per month to use.
 
 With very little hardware (an old computer, raspberry pi, whatever's on hand)
-one can create a dynamic dns solution using AWS technologies to operate around
+one can create a dynamic dns solution using AWS technologies that costs around
 $1 USD per month to maintain.
 
 ## Architecture Overview
