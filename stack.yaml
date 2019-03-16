@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-13.4
+resolver: lts-13.12
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -34,11 +34,11 @@ resolver: lts-13.4
 #  - wai
 packages:
 - .
-- ../hal
 # Dependency packages to be pulled from upstream that are not in the resolver
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
 extra-deps:
+  - hal-0.3.0
   - basic-lens-0.0.2@sha256:11fc2a10bd2c956fc0700660a6a86b0eacbb3487b5d8cf603f97dcb7b0707d5c
   - PyF-0.7.1.0@sha256:521046a5408e475320aa6dfa05e10adddc5645fd4b391a71ac842f1448b3f7bd
   # https://github.com/brendanhay/amazonka/issues/466
