@@ -29,7 +29,7 @@ handler Records { records = [record] } = do
     ipAddress <- getIp targetBucket targetKey
 
     $(K.logTM) InfoS
-        $ K.logStr ([f|Found '{ipAddress}' in '{targetKey}'.|] :: Text)
+        $ K.logStr ([f|Found '{show ipAddress}' in '{targetKey}'.|] :: Text)
 
     val <- updateResourceRecordSet hostedZoneId targetKey ipAddress
 

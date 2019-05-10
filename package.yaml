@@ -46,17 +46,19 @@ executables:
     main:             Main.hs
     dependencies:
       - base >= 4.7 && < 5
+      - PyF
       - aeson
       - amazonka
       - amazonka-core
       - amazonka-route53
       - amazonka-s3
+      - bytestring
       - conduit-extra
       - envy
       - exceptions
       - hal
+      - iproute
       - katip
       - microlens
       - mtl
-      - PyF
       - text
