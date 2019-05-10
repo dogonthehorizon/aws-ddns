@@ -28,3 +28,6 @@ lint-all: stylish-haskell hlint brittany
 
 test:
 	stack test --test-arguments "--color always"
+
+deploy: clean
+	@stack build --copy-bins && ./deploy.sh
